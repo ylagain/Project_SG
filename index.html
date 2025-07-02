@@ -162,6 +162,10 @@
         return;
       }
       if (match) {
+        const rect = match.element.getBoundingClientRect();
+        const areaRect = gameArea.getBoundingClientRect();
+        const x = rect.left - areaRect.left + 20;
+        const y = rect.top - areaRect.top;
         gameArea.removeChild(match.element);
         serials = serials.filter(s => s !== match);
         score += 10;
