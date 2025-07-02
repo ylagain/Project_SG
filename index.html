@@ -1,9 +1,9 @@
-<!DOCTYPE html>
 <html>
 <head>
   <title>Barcode Scanner Game</title>
   <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
   <style>
+
     .message-popup {
       position: absolute;
       max-width: 200px;
@@ -19,7 +19,7 @@
     }
 
     @keyframes fadeFloat {
-      0% { opacity: 1; transform: translateY(0); }
+      0%   { opacity: 1; transform: translateY(0); }
       100% { opacity: 0; transform: translateY(-40px); }
     }
 
@@ -35,15 +35,15 @@
 
     @keyframes explode {
       0% {
-        transform: translate(0, 0);
-        opacity: 1;
-      }
-      100% {
-        transform: translate(var(--dx), var(--dy));
-        opacity: 0;
-      }
+      transform: translate(0, 0);
+      opacity: 1;
     }
-
+      
+    100% {
+      transform: translate(var(--dx), var(--dy));
+      opacity: 0;
+    }
+      
     .floating-points {
       position: absolute;
       color: #00ff88;
@@ -55,7 +55,7 @@
     }
 
     @keyframes floatUp {
-      0% { opacity: 1; transform: translateY(0); }
+      0%   { opacity: 1; transform: translateY(0); }
       100% { opacity: 0; transform: translateY(-40px); }
     }
 
@@ -67,7 +67,6 @@
       text-align: center;
       overflow: hidden;
     }
-
     #gameArea {
       position: relative;
       width: 400px;
@@ -77,21 +76,14 @@
       border: 2px solid #333;
       overflow: hidden;
     }
-
     .barcode {
       position: absolute;
       width: 100px;
       height: 50px;
     }
-
     #inputDisplay {
-      font-size: 1.2em;
+      font-size: 1.5em;
       margin-top: 10px;
-    }
-
-    #scoreDisplay {
-      font-size: 1.3em;
-      margin: 10px 0;
     }
   </style>
 </head>
@@ -99,25 +91,33 @@
   <h1>🥩 Smokehouse Official Game 🍗</h1>
   <div id="gameArea"></div>
   <div id="scoreDisplay">Score: 0</div>
-  <div id="inputDisplay">Type or Scan: <span id="typed"></span></div>
+  <div id="inputDisplay">--------------------------------- <span id="typed"></span></div>
 
   <script>
     const gameArea = document.getElementById("gameArea");
     const typedSpan = document.getElementById("typed");
+
     let serials = [];
     let input = "";
     let score = 0;
-    let scanCount = 0;
 
     const messages = [
-      "Good Work", "Smoking Job", "Buen Trabajo", "Estas Loco",
-      "Hmmmmmmmm", "You Are Crazy", "Art Would be Proud",
-      "Get Back To Work", "Scanned", "Keep Going"
+    "Good Work",
+    "Smoking Job",
+    "Buen Trabajo",
+    "Estas Loco",
+    "Hmmmmmmmm",
+    "You Are Crazy",
+    "Art Would be Proud",
+    "Get Back To Work",
+    "Scanned",
+    "Keep Going"
     ];
 
-    function createBarcode() {
-      if (serials.length >= 5) return;
+    let scanCount = 0;
 
+
+    function createBarcode() {
       const code = Math.floor(1000 + Math.random() * 9000).toString();
       const barcode = document.createElement("img");
       barcode.classList.add("barcode");
@@ -136,73 +136,22 @@
 
     function updatePositions() {
       for (let s of serials) {
-        s.y += 0.8;
+        s.y += 1.5;
         s.element.style.top = s.y + "px";
       }
 
+      // Remove barcodes that fall off screen
       serials = serials.filter(s => {
         if (s.y > 550) {
           gameArea.removeChild(s.element);
-          score = Math.max(0, score - 10);
-          updateScore();
+          score -= 10;
+          document.getElementById("scoreDisplay").textContent = "Score: " + score;
           return false;
         }
         return true;
       });
 
       requestAnimationFrame(updatePositions);
-    }
-
-    function updateScore() {
-      document.getElementById("scoreDisplay").textContent = "Score: " + score;
-    }
-
-    function spawnFloatingPoints(x, y, value = "+10") {
-      const points = document.createElement("div");
-      points.className = "floating-points";
-      points.textContent = value;
-      points.style.left = x + "px";
-      points.style.top = y + "px";
-      gameArea.appendChild(points);
-
-      setTimeout(() => {
-        if (points.parentNode) points.remove();
-      }, 1000);
-    }
-
-    function spawnParticles(x, y, count = 8) {
-      for (let i = 0; i < count; i++) {
-        const p = document.createElement("div");
-        p.className = "particle";
-        p.style.left = x + "px";
-        p.style.top = y + "px";
-
-        const dx = (Math.random() * 40 - 20) + "px";
-        const dy = (Math.random() * -40) + "px";
-        p.style.setProperty('--dx', dx);
-        p.style.setProperty('--dy', dy);
-
-        const colors = ["#00ff88", "#29a329", "#99ffcc", "#ffffff"];
-        p.style.background = colors[Math.floor(Math.random() * colors.length)];
-
-        gameArea.appendChild(p);
-        setTimeout(() => {
-          if (p.parentNode) p.remove();
-        }, 800);
-      }
-    }
-
-    function spawnMessage() {
-      const msg = document.createElement("div");
-      msg.className = "message-popup";
-      msg.textContent = messages[Math.floor(Math.random() * messages.length)];
-      const areaRect = gameArea.getBoundingClientRect();
-      const x = Math.random() * (areaRect.width - 200);
-      const y = Math.random() * (areaRect.height - 100);
-      msg.style.left = x + "px";
-      msg.style.top = y + "px";
-      gameArea.appendChild(msg);
-      setTimeout(() => msg.remove(), 3000);
     }
 
     function checkInput() {
@@ -227,22 +176,87 @@
         }
         spawnFloatingPoints(x, y);
         spawnParticles(x + 30, y + 15);
-        updateScore();
+        console.log("Scanned: " + input + " | Score: " + score);
+        document.getElementById("scoreDisplay").textContent = "Score: " + score;
       }
       input = "";
       typedSpan.textContent = "";
     }
 
+    function spawnFloatingPoints(x, y, value = "+10") {
+          const points = document.createElement("div");
+          points.className = "floating-points";
+          points.textContent = value;
+          points.style.left = x + "px";
+          points.style.top = y + "px";
+          gameArea.appendChild(points);
+
+      // Remove after animation completes
+          setTimeout(() => {
+          gameArea.removeChild(points);
+          }, 1000);
+    }
+
+    function spawnParticles(x, y, count = 8) {
+      for (let i = 0; i < count; i++) {
+        const p = document.createElement("div");
+        p.className = "particle";
+        p.style.left = x + "px";
+        p.style.top = y + "px";
+  
+    // Random directions
+        const dx = (Math.random() * 40 - 20) + "px";
+        const dy = (Math.random() * -40) + "px";
+        p.style.setProperty('--dx', dx);
+        p.style.setProperty('--dy', dy);
+
+    // Random colors
+        const colors = ["#00ff88", "#29a329", "#99ffcc", "#ffffff"];
+        p.style.background = colors[Math.floor(Math.random() * colors.length)];
+
+        gameArea.appendChild(p);
+        setTimeout(() => gameArea.removeChild(p), 800);
+      }
+    }
+
     function testTrigger() {
       const x = 150 + Math.random() * 100;
       const y = 200 + Math.random() * 100;
+
+  // Fake floating +10
       spawnFloatingPoints(x, y);
+
+  // Fake particles
       spawnParticles(x + 30, y + 15);
+
       spawnMessage();
+
+  // Score update
       score += 10;
-      updateScore();
+      document.getElementById("scoreDisplay").textContent = "Score: " + score;
     }
 
+    function spawnMessage() {
+      const msg = document.createElement("div");
+      msg.className = "message-popup";
+      msg.textContent = messages[Math.floor(Math.random() * messages.length)];
+
+      // Random position inside the game area
+      const areaRect = gameArea.getBoundingClientRect();
+      const x = Math.random() * (areaRect.width - 200);
+      const y = Math.random() * (areaRect.height - 100);
+      msg.style.left = x + "px";
+      msg.style.top = y + "px";
+
+      gameArea.appendChild(msg);
+
+      // Auto-remove after animation
+      setTimeout(() => {
+        if (msg.parentNode) msg.remove();
+      }, 3000);
+    }
+
+    
     document.addEventListener("keydown", (e) => {
       if (e.key.match(/[0-9]/)) {
         input += e.key;
@@ -257,7 +271,7 @@
       }
     });
 
-    setInterval(createBarcode, 3000);
+    setInterval(createBarcode, 2000);
     updatePositions();
   </script>
 </body>
