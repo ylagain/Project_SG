@@ -1,21 +1,78 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Unblocked Game</title>
+  <title>Dodge Game</title>
   <style>
-    body, html {
-      margin: 0;
-      padding: 0;
-      overflow: hidden;
-    }
-    iframe {
-      width: 100vw;
-      height: 100vh;
-      border: none;
-    }
+    body { margin: 0; background: #222; color: white; text-align: center; font-family: sans-serif; }
+    canvas { background: #111; display: block; margin: 0 auto; border: 2px solid #555; }
   </style>
 </head>
 <body>
-  <iframe src="https://ubg98.github.io/ubg-chess/"></iframe>
+  <h1>Dodge the Boxes!</h1>
+  <canvas id="game" width="400" height="600"></canvas>
+
+  <script>
+    const canvas = document.getElementById("game");
+    const ctx = canvas.getContext("2d");
+
+    let player = { x: 180, y: 550, width: 40, height: 40 };
+    let boxes = [];
+    let score = 0;
+    let gameOver = false;
+
+    document.addEventListener("keydown", e => {
+      if (e.key === "ArrowLeft") player.x -= 20;
+      if (e.key === "ArrowRight") player.x += 20;
+    });
+
+    function addBox() {
+      const x = Math.random() * (canvas.width - 30);
+      boxes.push({ x: x, y: 0, width: 30, height: 30 });
+    }
+
+    function drawPlayer() {
+      ctx.fillStyle = "lime";
+      ctx.fillRect(player.x, player.y, player.width, player.height);
+    }
+
+    function drawBoxes() {
+      ctx.fillStyle = "red";
+      for (let box of boxes) {
+        ctx.fillRect(box.x, box.y, box.width, box.height);
+      }
+    }
+
+    function checkCollision(box) {
+      return (
+        player.x < box.x + box.width &&
+        player.x + player.width > box.x &&
+        player.y < box.y + box.height &&
+        player.y + player.height > box.y
+      );
+    }
+
+    function update() {
+      if (gameOver) return;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      drawPlayer();
+
+      for (let box of boxes) {
+        box.y += 4;
+        if (checkCollision(box)) {
+          gameOver = true;
+          alert("Game Over! Score: " + score);
+          return;
+        }
+      }
+
+      drawBoxes();
+      score++;
+      requestAnimationFrame(update);
+    }
+
+    setInterval(addBox, 1000);
+    update();
+  </script>
 </body>
 </html>
