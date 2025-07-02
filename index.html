@@ -1,77 +1,102 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Dodge Game</title>
+  <title>Serial Scanner</title>
   <style>
-    body { margin: 0; background: #222; color: white; text-align: center; font-family: sans-serif; }
-    canvas { background: #111; display: block; margin: 0 auto; border: 2px solid #555; }
+    body {
+      margin: 0;
+      background: #121212;
+      color: white;
+      font-family: monospace;
+      text-align: center;
+    }
+    canvas {
+      background: #1e1e1e;
+      display: block;
+      margin: 0 auto;
+      border: 2px solid #333;
+    }
+    #inputDisplay {
+      margin-top: 10px;
+      font-size: 1.5em;
+    }
   </style>
 </head>
 <body>
-  <h1>Dodge the Boxes!</h1>
+  <h1>🔎 Serial Scanner</h1>
   <canvas id="game" width="400" height="600"></canvas>
-
+  <div id="inputDisplay">Type to scan: <span id="typed"></span></div>
   <script>
     const canvas = document.getElementById("game");
     const ctx = canvas.getContext("2d");
+    const typedSpan = document.getElementById("typed");
 
-    let player = { x: 180, y: 550, width: 40, height: 40 };
-    let boxes = [];
+    let serials = [];
+    let input = "";
     let score = 0;
-    let gameOver = false;
 
-    document.addEventListener("keydown", e => {
-      if (e.key === "ArrowLeft") player.x -= 20;
-      if (e.key === "ArrowRight") player.x += 20;
-    });
-
-    function addBox() {
-      const x = Math.random() * (canvas.width - 30);
-      boxes.push({ x: x, y: 0, width: 30, height: 30 });
+    // Create random serial bar
+    function createSerial() {
+      const num = Math.floor(1000 + Math.random() * 9000).toString();
+      const x = Math.random() * (canvas.width - 100);
+      serials.push({ x, y: 0, speed: 1 + Math.random() * 2, code: num });
     }
 
-    function drawPlayer() {
-      ctx.fillStyle = "lime";
-      ctx.fillRect(player.x, player.y, player.width, player.height);
-    }
-
-    function drawBoxes() {
-      ctx.fillStyle = "red";
-      for (let box of boxes) {
-        ctx.fillRect(box.x, box.y, box.width, box.height);
+    function drawSerials() {
+      ctx.fillStyle = "white";
+      ctx.font = "20px monospace";
+      for (let s of serials) {
+        ctx.fillStyle = "#29a329";
+        ctx.fillRect(s.x, s.y, 100, 30);
+        ctx.fillStyle = "white";
+        ctx.fillText(s.code, s.x + 15, s.y + 22);
       }
-    }
-
-    function checkCollision(box) {
-      return (
-        player.x < box.x + box.width &&
-        player.x + player.width > box.x &&
-        player.y < box.y + box.height &&
-        player.y + player.height > box.y
-      );
     }
 
     function update() {
-      if (gameOver) return;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      drawPlayer();
-
-      for (let box of boxes) {
-        box.y += 4;
-        if (checkCollision(box)) {
-          gameOver = true;
-          alert("Game Over! Score: " + score);
-          return;
-        }
+      for (let s of serials) {
+        s.y += s.speed;
       }
 
-      drawBoxes();
-      score++;
+      drawSerials();
+      ctx.fillStyle = "white";
+      ctx.fillText("Score: " + score, 10, 20);
+
+      // Remove offscreen serials
+      serials = serials.filter(s => s.y < canvas.height);
+
       requestAnimationFrame(update);
     }
 
-    setInterval(addBox, 1000);
+    function checkInput() {
+      const match = serials.find(s => s.code === input);
+      if (match) {
+        serials = serials.filter(s => s !== match);
+        score += 10;
+      }
+      input = "";
+      typedSpan.textContent = "";
+    }
+
+    // Handle typing
+    document.addEventListener("keydown", (e) => {
+      if (e.key >= "0" && e.key <= "9") {
+        input += e.key;
+        typedSpan.textContent = input;
+      }
+      if (e.key === "Enter") {
+        checkInput();
+      }
+      if (e.key === "Backspace") {
+        input = input.slice(0, -1);
+        typedSpan.textContent = input;
+      }
+    });
+
+    // Start game loop and spawning
+    setInterval(createSerial, 1500);
     update();
   </script>
 </body>
