@@ -32,7 +32,7 @@
   </style>
 </head>
 <body>
-  <h1>🔎 Real Barcode Scanner Game</h1>
+  <h1>🥩 Smokehouse Official Game 🍗</h1>
   <div id="gameArea"></div>
   <div id="inputDisplay">Type or Scan: <span id="typed"></span></div>
 
@@ -69,8 +69,9 @@
 
       // Remove barcodes that fall off screen
       serials = serials.filter(s => {
-        if (s.y > 600) {
+        if (s.y > 500) {
           gameArea.removeChild(s.element);
+          score -= 10;
           return false;
         }
         return true;
