@@ -69,7 +69,7 @@
 
       // Remove barcodes that fall off screen
       serials = serials.filter(s => {
-        if (s.y > 500) {
+        if (s.y > 550) {
           gameArea.removeChild(s.element);
           score -= 10;
           return false;
