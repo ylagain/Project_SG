@@ -4,6 +4,47 @@
   <title>Barcode Scanner Game</title>
   <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
   <style>
+
+    .message-popup {
+      position: absolute;
+      max-width: 200px;
+      background: rgba(255, 255, 255, 0.05);
+      color: #00ff88;
+      font-size: 14px;
+      font-style: italic;
+      padding: 6px 10px;
+      border-radius: 8px;
+      animation: fadeFloat 3s ease-out forwards;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    @keyframes fadeFloat {
+      0%   { opacity: 1; transform: translateY(0); }
+      100% { opacity: 0; transform: translateY(-40px); }
+    }
+
+    .particle {
+      position: absolute;
+      width: 6px;
+      height: 6px;
+      background: yellow;
+      border-radius: 50%;
+      opacity: 1;
+      animation: explode 0.8s ease-out forwards;
+    }
+
+    @keyframes explode {
+      0% {
+      transform: translate(0, 0);
+      opacity: 1;
+    }
+      
+    100% {
+      transform: translate(var(--dx), var(--dy));
+      opacity: 0;
+    }
+      
     .floating-points {
       position: absolute;
       color: #00ff88;
@@ -59,6 +100,22 @@
     let input = "";
     let score = 0;
 
+    const messages = [
+    "Good Work",
+    "Smoking Job",
+    "Buen Trabajo",
+    "Estas Loco",
+    "Hmmmmmmmm",
+    "You Are Crazy",
+    "Art Would be Proud",
+    "Get Back To Work",
+    "Scanned",
+    "Keep Going"
+    ];
+
+    let scanCount = 0;
+
+
     function createBarcode() {
       const code = Math.floor(1000 + Math.random() * 9000).toString();
       const barcode = document.createElement("img");
@@ -98,11 +155,22 @@
 
     function checkInput() {
       const match = serials.find(s => s.code === input);
+      if (input.toLowerCase() === "test") {
+        testTrigger();
+        input = "";
+        typedSpan.textContent = "";
+        return;
+      }
       if (match) {
         gameArea.removeChild(match.element);
         serials = serials.filter(s => s !== match);
         score += 10;
+        scanCount++;
+        if (scanCount % 8 === 0) {
+          spawnMessage();
+        }
         spawnFloatingPoints(x, y);
+        spawnParticles(x + 30, y + 15);
         console.log("Scanned: " + input + " | Score: " + score);
         document.getElementById("scoreDisplay").textContent = "Score: " + score;
       }
@@ -124,7 +192,66 @@
           }, 1000);
     }
 
+    function spawnParticles(x, y, count = 8) {
+      for (let i = 0; i < count; i++) {
+        const p = document.createElement("div");
+        p.className = "particle";
+        p.style.left = x + "px";
+        p.style.top = y + "px";
+  
+    // Random directions
+        const dx = (Math.random() * 40 - 20) + "px";
+        const dy = (Math.random() * -40) + "px";
+        p.style.setProperty('--dx', dx);
+        p.style.setProperty('--dy', dy);
 
+    // Random colors
+        const colors = ["#00ff88", "#29a329", "#99ffcc", "#ffffff"];
+        p.style.background = colors[Math.floor(Math.random() * colors.length)];
+
+        gameArea.appendChild(p);
+        setTimeout(() => gameArea.removeChild(p), 800);
+      }
+    }
+
+    function testTrigger() {
+      const x = 150 + Math.random() * 100;
+      const y = 200 + Math.random() * 100;
+
+  // Fake floating +10
+      spawnFloatingPoints(x, y);
+
+  // Fake particles
+      spawnParticles(x + 30, y + 15);
+
+      spawnMessage();
+
+  // Score update
+      score += 10;
+      document.getElementById("scoreDisplay").textContent = "Score: " + score;
+    }
+
+    function spawnMessage() {
+      const msg = document.createElement("div");
+      msg.className = "message-popup";
+      msg.textContent = messages[Math.floor(Math.random() * messages.length)];
+
+      // Random position inside the game area
+      const areaRect = gameArea.getBoundingClientRect();
+      const x = Math.random() * (areaRect.width - 200);
+      const y = Math.random() * (areaRect.height - 100);
+      msg.style.left = x + "px";
+      msg.style.top = y + "px";
+
+      gameArea.appendChild(msg);
+
+      // Auto-remove after animation
+      setTimeout(() => {
+        if (msg.parentNode) msg.remove();
+      }, 3000);
+    }
+
+    
     document.addEventListener("keydown", (e) => {
       if (e.key.match(/[0-9]/)) {
         input += e.key;
