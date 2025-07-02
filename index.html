@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Serial Scanner</title>
+  <title>Barcode Scanner Game</title>
+  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
   <style>
     body {
       margin: 0;
@@ -9,80 +10,89 @@
       color: white;
       font-family: monospace;
       text-align: center;
+      overflow: hidden;
     }
-    canvas {
-      background: #1e1e1e;
-      display: block;
+    #gameArea {
+      position: relative;
+      width: 400px;
+      height: 600px;
       margin: 0 auto;
+      background: #1e1e1e;
       border: 2px solid #333;
     }
+    .barcode {
+      position: absolute;
+      width: 100px;
+      height: 50px;
+    }
     #inputDisplay {
-      margin-top: 10px;
       font-size: 1.5em;
+      margin-top: 10px;
     }
   </style>
 </head>
 <body>
-  <h1>🔎 Serial Scanner</h1>
-  <canvas id="game" width="400" height="600"></canvas>
-  <div id="inputDisplay">Type to scan: <span id="typed"></span></div>
+  <h1>🔎 Real Barcode Scanner Game</h1>
+  <div id="gameArea"></div>
+  <div id="inputDisplay">Type or Scan: <span id="typed"></span></div>
+
   <script>
-    const canvas = document.getElementById("game");
-    const ctx = canvas.getContext("2d");
+    const gameArea = document.getElementById("gameArea");
     const typedSpan = document.getElementById("typed");
 
     let serials = [];
     let input = "";
     let score = 0;
 
-    // Create random serial bar
-    function createSerial() {
-      const num = Math.floor(1000 + Math.random() * 9000).toString();
-      const x = Math.random() * (canvas.width - 100);
-      serials.push({ x, y: 0, speed: 1 + Math.random() * 2, code: num });
+    function createBarcode() {
+      const code = Math.floor(1000 + Math.random() * 9000).toString();
+      const barcode = document.createElement("img");
+      barcode.classList.add("barcode");
+      barcode.style.left = Math.random() * 300 + "px";
+      barcode.style.top = "0px";
+      JsBarcode(barcode, code, {
+        format: "CODE128",
+        width: 2,
+        height: 40,
+        displayValue: false,
+      });
+
+      gameArea.appendChild(barcode);
+      serials.push({ code, element: barcode, y: 0 });
     }
 
-    function drawSerials() {
-      ctx.fillStyle = "white";
-      ctx.font = "20px monospace";
+    function updatePositions() {
       for (let s of serials) {
-        ctx.fillStyle = "#29a329";
-        ctx.fillRect(s.x, s.y, 100, 30);
-        ctx.fillStyle = "white";
-        ctx.fillText(s.code, s.x + 15, s.y + 22);
-      }
-    }
-
-    function update() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      for (let s of serials) {
-        s.y += s.speed;
+        s.y += 1.5;
+        s.element.style.top = s.y + "px";
       }
 
-      drawSerials();
-      ctx.fillStyle = "white";
-      ctx.fillText("Score: " + score, 10, 20);
+      // Remove barcodes that fall off screen
+      serials = serials.filter(s => {
+        if (s.y > 600) {
+          gameArea.removeChild(s.element);
+          return false;
+        }
+        return true;
+      });
 
-      // Remove offscreen serials
-      serials = serials.filter(s => s.y < canvas.height);
-
-      requestAnimationFrame(update);
+      requestAnimationFrame(updatePositions);
     }
 
     function checkInput() {
       const match = serials.find(s => s.code === input);
       if (match) {
+        gameArea.removeChild(match.element);
         serials = serials.filter(s => s !== match);
         score += 10;
+        console.log("Scanned: " + input + " | Score: " + score);
       }
       input = "";
       typedSpan.textContent = "";
     }
 
-    // Handle typing
     document.addEventListener("keydown", (e) => {
-      if (e.key >= "0" && e.key <= "9") {
+      if (e.key.match(/[0-9]/)) {
         input += e.key;
         typedSpan.textContent = input;
       }
@@ -95,9 +105,8 @@
       }
     });
 
-    // Start game loop and spawning
-    setInterval(createSerial, 1500);
-    update();
+    setInterval(createBarcode, 2000);
+    updatePositions();
   </script>
 </body>
 </html>
