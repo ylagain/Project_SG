@@ -231,6 +231,10 @@
     }
 
     document.addEventListener("keydown", (e) => {
+      if (e.key.match(/[a-zA-Z0-9]/)) {
+        input += e.key;
+        typedSpan.textContent = input;
+      }  
       if (e.key.match(/[0-9]/)) {
         input += e.key;
         typedSpan.textContent = input;
