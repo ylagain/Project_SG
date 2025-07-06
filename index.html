@@ -2,7 +2,6 @@
 <html>
 <head>
   <title>Barcode Scanner Game</title>
-  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
   <style>
     .message-popup {
       position: absolute;
@@ -90,9 +89,9 @@
   </style>
 </head>
 <body>
-  <h1>🥩 Smokehouse Official Game 🍗</h1>
-  <div id="gameArea"></div>
+  <h1>🍗 Smokehouse Official Game 🍗</h1>
   <div id="scoreDisplay">Score: 0</div>
+  <div id="gameArea"></div>
   <div id="inputDisplay">Type or Scan: <span id="typed"></span></div>
 
   <script>
@@ -108,22 +107,21 @@
       "Hmmmmmmmm", "You Are Crazy", "Art Would be Proud",
       "Get Back To Work", "Scanned", "Keep Going"
     ];
+    
+    const barcodeImages = [
+  { code: "1906", src: "img/codeFounder.png" },
+  { code: "206041", src: "img/codeEmID.png" },
+  ];
 
     function createBarcode() {
-      const code = Math.floor(1000 + Math.random() * 9000).toString();
+      const choice = barcodeImages[Math.floor(Math.random() * barcodeImages.length)]
       const barcode = document.createElement("img");
       barcode.classList.add("barcode");
       barcode.style.left = Math.random() * 300 + "px";
       barcode.style.top = "0px";
-      JsBarcode(barcode, code, {
-        format: "CODE128",
-        width: 2,
-        height: 40,
-        displayValue: false,
-      });
-
+      barcode.src = choice.src;
       gameArea.appendChild(barcode);
-      serials.push({ code, element: barcode, y: 0 });
+      serials.push({ code: choice.code, element: barcode, y: 0 });
     }
 
     function updatePositions() {
