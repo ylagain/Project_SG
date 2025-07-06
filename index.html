@@ -229,23 +229,22 @@
       updateScore();
     }
 
-    document.addEventListener("keydown", (e) => {
-      if (e.key.match(/[a-zA-Z0-9]/)) {
-        input += e.key;
-        typedSpan.textContent = input;
-      }  
-      if (e.key.match(/[0-9]/)) {
-        input += e.key;
-        typedSpan.textContent = input;
-      }
-      if (e.key === "Enter") {
-        checkInput();
-      }
-      if (e.key === "Backspace") {
-        input = input.slice(0, -1);
-        typedSpan.textContent = input;
-      }
-    });
+   document.addEventListener("keydown", (e) => {
+  // Only allow single character keys (letters and digits)
+  if (e.key.length === 1 && /[a-zA-Z0-9]/.test(e.key)) {
+    input += e.key;
+    typedSpan.textContent = input;
+  }
+
+  if (e.key === "Backspace") {
+    input = input.slice(0, -1);
+    typedSpan.textContent = input;
+  }
+
+  if (e.key === "Enter") {
+    checkInput();
+  }
+  });
 
     setInterval(createBarcode, 2000); // 2 seconds
     updatePositions();
